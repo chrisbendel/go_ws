@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/chrisbendel/go_ws/letters"
@@ -62,17 +61,21 @@ func (c *Client) listenToRead() {
 			var msg Message
 			err := websocket.JSON.Receive(c.connection, &msg)
 			fmt.Printf("Received: %+v\n", msg.Body)
-			reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println("hello1")
-			processedString := reg.ReplaceAllString(msg.Body, "")
-			guessedRune := rune('a')
 
-			if processedString != "" {
-				guessedRune = rune(processedString[0])
-			}
+			// reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+
+			// processedString := reg.ReplaceAllString(msg.Body, "")
+			// guessedRune := rune('a')
+
+			// if processedString != "" {
+			// 	guessedRune = rune(processedString[0])
+			// }
+
+			guessedRune := letters.UserGuessToRune(msg.Body)
 
 			if !strings.ContainsRune(string(c.guessed), guessedRune) {
 				c.guessed = append(c.guessed, guessedRune)
@@ -88,16 +91,20 @@ func (c *Client) listenToRead() {
 				fmt.Println(&msg)
 
 				if letters.IsCorrect(currentWord, userGuess) {
+					//Generate a new random word for the next round
 					currentWord = words.GetRandomWord()
+					//Clear the user's previous guesses server side
 					c.guessed = make([]rune, 0)
+					//Message to inform the user that the game is over and notify everyone who won this round
 					m := Message{
-						Author: "Server",
+						Author: fmt.Sprintf("The game has ended. You are player %s", c.name),
 						Body:   fmt.Sprintf("Player %s won the game. Start typing to play the next round. Your hint is %s", c.name, letters.ReplaceLetters(currentWord, c.guessed)),
 					}
-					broadcast(&m)
+					c.ch <- &m
+					// broadcast(&m)
 				} else {
 					m := Message{
-						Author: c.name,
+						Author: fmt.Sprintf("You are player %s", c.name),
 						Body:   userGuess,
 					}
 

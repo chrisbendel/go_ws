@@ -1,5 +1,10 @@
 package letters
 
+import (
+	"log"
+	"regexp"
+)
+
 func ReplaceLetters(answer string, guessed []rune) string {
 	var updatedAnswer = ""
 	for _, c := range answer {
@@ -20,6 +25,23 @@ func ReplaceLetters(answer string, guessed []rune) string {
 	}
 
 	return string(questionMarks)
+}
+
+func UserGuessToRune(userGuess string) rune {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	processedString := reg.ReplaceAllString(userGuess, "")
+	guessedRune := rune('a')
+
+	if processedString != "" {
+		guessedRune = rune(processedString[0])
+	}
+
+	return guessedRune
 }
 
 func IsCorrect(correctAnswer string, userAnswer string) bool {

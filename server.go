@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/chrisbendel/go_ws/letters"
 	"github.com/chrisbendel/go_ws/words"
 	"golang.org/x/net/websocket"
 )
@@ -27,8 +28,8 @@ func broadcast(msg *Message) {
 }
 
 func addClientAndGreet(list []Client, client Client) []Client {
-	fmt.Printf("%d\n", len(list))
+	hiddenWord := letters.ReplaceLetters(currentWord, client.guessed)
 	clients = append(list, client)
-	websocket.JSON.Send(client.connection, Message{"Hey welcome to hangman", fmt.Sprintf("Your current word to guess is %s", currentWord)})
+	websocket.JSON.Send(client.connection, Message{fmt.Sprintf("Hey welcome to the coolest hangman game ever. You are currently player %s", client.name), fmt.Sprintf("Your current word to guess is %s", hiddenWord)})
 	return clients
 }

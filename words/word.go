@@ -13,6 +13,10 @@ func GetRandomWord() string {
 		"PHRASE with space",
 		"GOLANG fun",
 		"TWO cool dogs",
+		"this is fun times",
+		"hangman is a great game",
+		"bud light is not so bad",
+		"caterpillar",
 	}
 	n := rand.Int() % len(words)
 	return strings.ToUpper(words[n])
