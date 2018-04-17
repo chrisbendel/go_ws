@@ -6,8 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/chrisbendel/go_ws/letters"
-	"github.com/chrisbendel/go_ws/words"
+	"github.com/chrisbendel/go_ws/utils"
 	"golang.org/x/net/websocket"
 )
 
@@ -75,13 +74,13 @@ func (c *Client) listenToRead() {
 			// 	guessedRune = rune(processedString[0])
 			// }
 
-			guessedRune := letters.UserGuessToRune(msg.Body)
+			guessedRune := utils.UserGuessToRune(msg.Body)
 
 			if !strings.ContainsRune(string(c.guessed), guessedRune) {
 				c.guessed = append(c.guessed, guessedRune)
 			}
 
-			userGuess := letters.ReplaceLetters(currentWord, c.guessed)
+			userGuess := utils.ReplaceLetters(currentWord, c.guessed)
 
 			if err == io.EOF {
 				c.close <- true
@@ -90,15 +89,15 @@ func (c *Client) listenToRead() {
 			} else {
 				fmt.Println(&msg)
 
-				if letters.IsCorrect(currentWord, userGuess) {
+				if utils.IsCorrect(currentWord, userGuess) {
 					//Generate a new random word for the next round
-					currentWord = words.GetRandomWord()
+					currentWord = utils.GetRandomWord()
 					//Clear the user's previous guesses server side
 					c.guessed = make([]rune, 0)
 					//Message to inform the user that the game is over and notify everyone who won this round
 					m := Message{
 						Author: fmt.Sprintf("The game has ended. You are player %s", c.name),
-						Body:   fmt.Sprintf("Player %s won the game. Start typing to play the next round. Your hint is %s", c.name, letters.ReplaceLetters(currentWord, c.guessed)),
+						Body:   fmt.Sprintf("Player %s won the game. Start typing to play the next round. Your hint is %s", c.name, utils.ReplaceLetters(currentWord, c.guessed)),
 					}
 					c.ch <- &m
 					// broadcast(&m)
