@@ -11,6 +11,7 @@ import (
 func ReplaceLetters(answer string, guessed []rune) string {
 	var updatedAnswer = ""
 	for _, c := range answer {
+		//Space case
 		if c == 32 {
 			updatedAnswer += " "
 		} else {
@@ -38,7 +39,8 @@ func UserGuessToRune(userGuess string) rune {
 	}
 
 	processedString := reg.ReplaceAllString(userGuess, "")
-	guessedRune := rune('a')
+	//Non letter character so the client doesn't get render anything if user doesn't input a letter
+	guessedRune := rune('~')
 
 	if processedString != "" {
 		guessedRune = rune(processedString[0])
@@ -53,6 +55,7 @@ func IsCorrect(correctAnswer string, userAnswer string) bool {
 
 func GetRandomWord() string {
 	rand.Seed(time.Now().Unix())
+	//Word bank
 	words := []string{
 		"TESTING the cool thing",
 		"PHRASE with space",

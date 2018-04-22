@@ -59,21 +59,6 @@ func (c *Client) listenToRead() {
 		default:
 			var msg Message
 			err := websocket.JSON.Receive(c.connection, &msg)
-			fmt.Printf("Received: %+v\n", msg.Body)
-
-			// reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-
-			// processedString := reg.ReplaceAllString(msg.Body, "")
-			// guessedRune := rune('a')
-
-			// if processedString != "" {
-			// 	guessedRune = rune(processedString[0])
-			// }
-
 			guessedRune := utils.UserGuessToRune(msg.Body)
 
 			if !strings.ContainsRune(string(c.guessed), guessedRune) {
@@ -88,7 +73,7 @@ func (c *Client) listenToRead() {
 				// c.server.Err(err)
 			} else {
 				fmt.Println(&msg)
-
+				previousWord := currentWord
 				if utils.IsCorrect(currentWord, userGuess) {
 					//Generate a new random word for the next round
 					currentWord = utils.GetRandomWord()
@@ -96,15 +81,15 @@ func (c *Client) listenToRead() {
 					c.guessed = make([]rune, 0)
 					//Message to inform the user that the game is over and notify everyone who won this round
 					m := Message{
-						Author: fmt.Sprintf("The game has ended. You are player %s", c.name),
-						Body:   fmt.Sprintf("Player %s won the game. Start typing to play the next round. Your hint is %s", c.name, utils.ReplaceLetters(currentWord, c.guessed)),
+						Author: fmt.Sprintf("Player %s correctly guessed %s and won the game!!!", c.name, previousWord),
+						Body:   fmt.Sprintf("Start typing to play the next round. Your hint is %s", utils.ReplaceLetters(currentWord, c.guessed)),
 					}
-					c.ch <- &m
-					// broadcast(&m)
+
+					broadcast(&m)
 				} else {
 					m := Message{
-						Author: fmt.Sprintf("You are player %s", c.name),
-						Body:   userGuess,
+						Author: fmt.Sprintf("You are player %s.", c.name),
+						Body:   fmt.Sprintf("Current guess: %s", userGuess),
 					}
 
 					c.ch <- &m
